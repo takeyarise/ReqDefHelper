@@ -9,7 +9,6 @@ import os
 import json
 import logging
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -142,6 +141,7 @@ interface = gr.Interface(
 )
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     load_dotenv()
 
     interface.launch()
