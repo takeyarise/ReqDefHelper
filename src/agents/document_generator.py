@@ -1,14 +1,17 @@
+import os
 from langchain_ollama import ChatOllama
 from langchain.prompts import ChatPromptTemplate
-from typing import Dict, Any
+from typing import Dict
 import json
 import markdown
-from datetime import datetime
 
 
 class DocumentGenerator:
     def __init__(self):
-        self.llm = ChatOllama(model="llama3.1:8b")
+        self.llm = ChatOllama(
+            model=os.environ.get('MODEL', "llama3.1:8b"),
+            base_url=os.environ.get('BASE_URL', None),
+        )
         self.setup_prompts()
         self.setup_chains()
 
@@ -91,12 +94,10 @@ You must adhere to the following rules:
 """
 
     def setup_chains(self):
-        # self.proposal_chain = LLMChain(llm=self.llm, prompt=self.proposal_template)
         self.proposal_chain = ChatPromptTemplate([
             ("system", self.system_prompt),
             ("user", self.proposal_template)
         ]) | self.llm
-        # self.review_chain = LLMChain(llm=self.llm, prompt=self.review_template)
         self.review_chain = ChatPromptTemplate([
             ("system", self.system_prompt),
             ("user", self.review_template)
@@ -136,13 +137,13 @@ You must adhere to the following rules:
             ("system", self.system_prompt),
             ("user", revision_template)
         ]) | self.llm
-        
+
         sorted_feedback = sorted(
             feedback["review_points"],
             key=lambda x: x["priority"],
             reverse=True
         )
-        
+
         current_doc = document
         for feedback_point in sorted_feedback:
             current_doc = revision_chain.invoke({

@@ -53,6 +53,9 @@ http://127.0.0.1:7860
 
 ## プロジェクト構造
 
+> [!NOTE]
+> 現在 `main.py` と `agents` ディレクトリにあるソースのみ使用している．
+
 ```
 requirements_system/
 ├── requirements.txt

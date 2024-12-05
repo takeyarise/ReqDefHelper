@@ -1,3 +1,4 @@
+import os
 from langchain_ollama import ChatOllama
 from langchain.prompts import ChatPromptTemplate
 from typing import List, Dict
@@ -6,7 +7,10 @@ import json
 
 class TaskManager:
     def __init__(self):
-        self.llm = ChatOllama(model="llama3.1:8b")
+        self.llm = ChatOllama(
+            model=os.environ.get('MODEL', "llama3.1:8b"),
+            base_url=os.environ.get('BASE_URL', None),
+        )
         self.setup_prompts()
         self.setup_chains()
 
@@ -66,12 +70,10 @@ You must adhere to the following rules:
 """
 
     def setup_chains(self):
-        # self.task_chain = LLMChain(llm=self.llm, prompt=self.task_generation_template)
         self.task_chain = ChatPromptTemplate([
             ("system", self.system_prompt),
             ("user", self.task_generation_template)
         ]) | self.llm
-        # self.schedule_chain = LLMChain(llm=self.llm, prompt=self.schedule_template)
         self.schedule_chain = ChatPromptTemplate([
             ("system", self.system_prompt),
             ("user", self.schedule_template)
@@ -99,10 +101,10 @@ You must adhere to the following rules:
             role = task.get("assigned_to", "一般エンジニア")
             hours = task.get("estimated_hours", 0)
             rate = rates.get(role, rates["一般エンジニア"])
-            
+
             task_cost = hours * rate
             total_cost += task_cost
-            
+
             phase = task.get("phase", "その他")
             if phase not in cost_breakdown:
                 cost_breakdown[phase] = 0
